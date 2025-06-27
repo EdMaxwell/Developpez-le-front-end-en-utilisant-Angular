@@ -1,3 +1,19 @@
-<h2>Olympic games app</h2>
-<hr />
-<p>{{ (olympics$ | async)?.length }} data loaded</p>
+<section class="home-container">
+
+  <mat-toolbar color="primary">
+    <span>Olympic Games Dashboard</span>
+  </mat-toolbar>
+
+  <div class="chart-wrapper">
+    <ngx-charts-pie-chart
+      (select)="onSelect($event)"
+      [doughnut]="isDoughnut"
+      [labels]="showLabels"
+      [legend]="showLegend"
+      [results]="chartData$ | async"
+      [view]="view"
+    >
+    </ngx-charts-pie-chart>
+  </div>
+
+</section>
