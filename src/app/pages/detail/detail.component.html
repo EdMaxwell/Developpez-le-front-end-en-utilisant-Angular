@@ -1,0 +1,53 @@
+<section class="detail-container">
+
+  <!-- Toolbar with back button and title -->
+  <mat-toolbar class="title-toolbar">
+    <button (click)="goBack()" mat-icon-button>
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <span class="toolbar-title">
+      Details for {{ (country$ | async)?.country }}
+    </span>
+  </mat-toolbar>
+
+  <!-- Global Stats -->
+  <ng-container *ngIf="countryStats$ | async as stats">
+    <div class="stats-section">
+      <h3 class="stats-header">Global Stats</h3>
+      <div class="stats-cards">
+        <mat-card class="stat-card">
+          <mat-card-title>Participations</mat-card-title>
+          <mat-card-content>{{ stats.participationCount }}</mat-card-content>
+        </mat-card>
+        <mat-card class="stat-card">
+          <mat-card-title>Total medals</mat-card-title>
+          <mat-card-content>{{ stats.totalMedals }}</mat-card-content>
+        </mat-card>
+        <mat-card class="stat-card">
+          <mat-card-title>Total athletes</mat-card-title>
+          <mat-card-content>{{ stats.totalAthletes }}</mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- Line Chart -->
+  <div class="chart-wrapper">
+    <ngx-charts-line-chart
+      [gradient]="false"
+      [legend]="showLegend"
+      [results]="medalSeries$ | async"
+      [scheme]="'vivid'"
+      [showXAxisLabel]="showXAxisLabel"
+      [showYAxisLabel]="showYAxisLabel"
+      [timeline]="timeline"
+      [view]="viewSize"
+      [xAxisLabel]="xAxisLabel"
+      [xAxis]="showXAxis"
+      [yAxisLabel]="yAxisLabel"
+      [yAxis]="showYAxis"
+    >
+    </ngx-charts-line-chart>
+  </div>
+
+</section>
