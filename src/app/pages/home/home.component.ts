@@ -38,12 +38,14 @@ export class HomeComponent implements OnInit, OnDestroy {
   public hasError = false;
 
   /** Chart configuration */
-  public view: [number, number] = [700, 400];
   public showLegend = false;
   public showLabels = true;
   public isDoughnut = false;
   private destroy$ = new Subject<void>();
   private _chartItems: ChartItem[] = [];
+
+  /** Responsive view size based on window width */
+  public view: [number, number] = [window.innerWidth < 700 ? window.innerWidth - 32 : 700, 400];
 
   constructor(
     private olympicService: OlympicService,
@@ -55,6 +57,7 @@ export class HomeComponent implements OnInit, OnDestroy {
    * Angular lifecycle hook. Initializes the component.
    */
   ngOnInit(): void {
+    window.removeEventListener('resize', this.updateView.bind(this));
     this.loadGlobalData();
     this.initChartDataObservable();
   }
@@ -103,6 +106,7 @@ export class HomeComponent implements OnInit, OnDestroy {
    * Angular lifecycle hook. Cleans up subscriptions on destroy.
    */
   ngOnDestroy(): void {
+    window.removeEventListener('resize', this.updateView.bind(this));
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -116,5 +120,11 @@ export class HomeComponent implements OnInit, OnDestroy {
     if (clicked) {
       this.router.navigate(['country', clicked.id]);
     }
+  }
+
+  /** Updates the view size based on the window width */
+  private updateView() {
+    const width = Math.min(window.innerWidth - 32, 700);
+    this.view = [width, 400];
   }
 }

@@ -1,8 +1,8 @@
 <section class="home-container">
 
-  <mat-toolbar color="primary">
+  <header class="toolbar">
     <span>Olympic Games Dashboard</span>
-  </mat-toolbar>
+  </header>
 
   <!-- Spinner pendant le chargement -->
   <ng-container *ngIf="(chartData$ | async) === undefined">
@@ -17,11 +17,10 @@
       [doughnut]="isDoughnut"
       [labels]="showLabels"
       [legend]="showLegend"
-      [results]="chartData$ | async"
+      [results]="data"
       [view]="view"
     >
     </ngx-charts-pie-chart>
   </div>
-
 
 </section>
