@@ -1,7 +1,7 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {CommonModule, Location} from '@angular/common';
 import {ActivatedRoute} from '@angular/router';
-import {Observable} from 'rxjs';
+import {Observable, Subject, takeUntil} from 'rxjs';
 import {filter, map, switchMap} from 'rxjs/operators';
 
 import {NgxChartsModule} from '@swimlane/ngx-charts';
@@ -12,7 +12,6 @@ import {MatCardModule} from '@angular/material/card';
 
 import {OlympicService} from 'src/app/core/services/olympic.service';
 import IOlympicCountry from "../../core/models/Olympic";
-
 
 interface LineChartSeries {
   name: string;
@@ -33,7 +32,7 @@ interface LineChartSeries {
   templateUrl: './detail.component.html',
   styleUrls: ['./detail.component.scss'],
 })
-export class DetailComponent implements OnInit {
+export class DetailComponent implements OnInit, OnDestroy {
   public country$!: Observable<IOlympicCountry | null | undefined>;
   public countryStats$!: Observable<{
     participationCount: number;
@@ -41,8 +40,9 @@ export class DetailComponent implements OnInit {
     totalAthletes: number;
   }>;
   public medalSeries$!: Observable<LineChartSeries[]>;
+  private destroy$ = new Subject<void>();
 
-  // options ngx-charts
+  // ngx-charts options
   public viewSize: [number, number] = [700, 300];
   public showXAxis = true;
   public showYAxis = true;
@@ -60,18 +60,41 @@ export class DetailComponent implements OnInit {
   ) {
   }
 
+  /**
+   * Angular lifecycle hook. Initializes the component.
+   */
   ngOnInit(): void {
-    // 1) Charger les données globales
-    this.olympicService.loadInitialData().subscribe();
+    this.loadGlobalData();
+    this.initCountryObservable();
+    this.initCountryStatsObservable();
+    this.initMedalSeriesObservable();
+  }
 
-    // 2) Récupérer l’ID et le pays
+  /**
+   * Loads the global olympic data.
+   * Unsubscribes automatically on component destroy.
+   */
+  private loadGlobalData(): void {
+    this.olympicService.loadInitialData()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe();
+  }
+
+  /**
+   * Initializes the country$ observable based on the route parameter.
+   */
+  private initCountryObservable(): void {
     this.country$ = this.activatedRoute.paramMap.pipe(
       map(pm => Number(pm.get('id'))),
       filter(id => !isNaN(id)),
       switchMap(id => this.olympicService.getCountryById(id))
     );
+  }
 
-    // 3) Stats globales
+  /**
+   * Initializes the countryStats$ observable with participation, medals, and athletes stats.
+   */
+  private initCountryStatsObservable(): void {
     this.countryStats$ = this.country$.pipe(
       map(country => {
         if (!country) {
@@ -85,8 +108,12 @@ export class DetailComponent implements OnInit {
         return {participationCount, totalMedals, totalAthletes};
       })
     );
+  }
 
-    // 4) Série pour le line-chart
+  /**
+   * Initializes the medalSeries$ observable for the line chart.
+   */
+  private initMedalSeriesObservable(): void {
     this.medalSeries$ = this.country$.pipe(
       map(country => {
         if (!country) return [];
@@ -99,6 +126,17 @@ export class DetailComponent implements OnInit {
     );
   }
 
+  /**
+   * Angular lifecycle hook. Cleans up subscriptions on destroy.
+   */
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  /**
+   * Navigates back to the previous page.
+   */
   public goBack(): void {
     this.location.back();
   }
