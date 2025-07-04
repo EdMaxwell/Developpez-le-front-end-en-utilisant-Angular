@@ -1,8 +1,8 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {CommonModule, Location} from '@angular/common';
-import {ActivatedRoute} from '@angular/router';
+import {CommonModule} from '@angular/common';
+import {ActivatedRoute, Router} from '@angular/router';
 import {Observable, Subject, takeUntil} from 'rxjs';
-import {filter, map, switchMap} from 'rxjs/operators';
+import {catchError, filter, map, switchMap, tap} from 'rxjs/operators';
 
 import {NgxChartsModule} from '@swimlane/ngx-charts';
 import {MatToolbarModule} from '@angular/material/toolbar';
@@ -12,6 +12,8 @@ import {MatCardModule} from '@angular/material/card';
 
 import {OlympicService} from 'src/app/core/services/olympic.service';
 import IOlympicCountry from "../../core/models/Olympic";
+import {ErrorMessageComponent} from "../../shared/error-message/error-message.component";
+import {LoadingSpinnerComponent} from "../../shared/loading-spinner/loading-spinner.component";
 
 interface LineChartSeries {
   name: string;
@@ -28,11 +30,15 @@ interface LineChartSeries {
     MatButtonModule,
     MatIconModule,
     MatCardModule,
+    ErrorMessageComponent,
+    LoadingSpinnerComponent
   ],
   templateUrl: './detail.component.html',
   styleUrls: ['./detail.component.scss'],
 })
 export class DetailComponent implements OnInit, OnDestroy {
+
+  /** Observable for the selected country */
   public country$!: Observable<IOlympicCountry | null | undefined>;
   public countryStats$!: Observable<{
     participationCount: number;
@@ -41,6 +47,10 @@ export class DetailComponent implements OnInit, OnDestroy {
   }>;
   public medalSeries$!: Observable<LineChartSeries[]>;
   private destroy$ = new Subject<void>();
+
+  /** Error state for data loading */
+  public hasError = false;
+  public countryNotFound = false;
 
   // ngx-charts options
   public viewSize: [number, number] = [700, 300];
@@ -56,7 +66,7 @@ export class DetailComponent implements OnInit, OnDestroy {
   constructor(
     private activatedRoute: ActivatedRoute,
     private olympicService: OlympicService,
-    private location: Location
+    private router: Router
   ) {
   }
 
@@ -87,7 +97,25 @@ export class DetailComponent implements OnInit, OnDestroy {
     this.country$ = this.activatedRoute.paramMap.pipe(
       map(pm => Number(pm.get('id'))),
       filter(id => !isNaN(id)),
-      switchMap(id => this.olympicService.getCountryById(id))
+      switchMap(id => this.olympicService.getCountryById(id).pipe(
+        catchError(err => {
+          this.hasError = true;
+          this.countryNotFound = false;
+          return [null];
+        })
+      )),
+      tap(country => {
+        if (country === null) {
+          this.hasError = true;
+          this.countryNotFound = true; // pays non trouvé
+        } else if (country === undefined) {
+          this.hasError = false;
+          this.countryNotFound = false; // chargement
+        } else {
+          this.hasError = false;
+          this.countryNotFound = false; // pays trouvé
+        }
+      })
     );
   }
 
@@ -138,6 +166,6 @@ export class DetailComponent implements OnInit, OnDestroy {
    * Navigates back to the previous page.
    */
   public goBack(): void {
-    this.location.back();
+    this.router.navigate(['/']);
   }
 }

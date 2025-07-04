@@ -4,7 +4,14 @@
     <span>Olympic Games Dashboard</span>
   </mat-toolbar>
 
-  <div class="chart-wrapper">
+  <!-- Spinner pendant le chargement -->
+  <ng-container *ngIf="(chartData$ | async) === undefined">
+    <app-loading-spinner></app-loading-spinner>
+  </ng-container>
+
+  <app-error-message *ngIf="hasError"></app-error-message>
+
+  <div class="chart-wrapper" *ngIf="(chartData$ | async) as data">
     <ngx-charts-pie-chart
       (select)="onSelect($event)"
       [doughnut]="isDoughnut"
@@ -15,5 +22,6 @@
     >
     </ngx-charts-pie-chart>
   </div>
+
 
 </section>

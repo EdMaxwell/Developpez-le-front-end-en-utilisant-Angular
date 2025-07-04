@@ -20,7 +20,6 @@ export class OlympicService {
     return this.http.get<IOlympicCountry[]>(this.olympicUrl).pipe(
       tap((countries) => this.olympics$.next(countries)),
       catchError((err) => {
-        console.error('Erreur de chargement des données JO', err);
         // on émet `null` pour signaler l’erreur aux abonnés
         this.olympics$.next(null);
         // on retourne un `of(null)` pour que l’abonné de loadInitialData voie aussi `null`
@@ -34,10 +33,13 @@ export class OlympicService {
   }
 
 
-  getCountryById(id: number): Observable<IOlympicCountry | undefined> {
+  getCountryById(id: number): Observable<IOlympicCountry | null | undefined> {
     return this.olympics$.pipe(
-      // si undefined (pas encore chargé) ou null (erreur), on transmet tel quel
-      map(list => Array.isArray(list) ? list.find(c => c.id === id) : undefined)
+      map(list => {
+        if (list === undefined) return undefined; // chargement
+        if (list === null) return null; // erreur de chargement
+        return list.find(c => c.id === id) ?? null; // null si pas trouvé
+      })
     );
   }
 
