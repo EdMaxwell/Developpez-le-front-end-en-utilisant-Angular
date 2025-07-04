@@ -11,6 +11,7 @@ import IOlympicCountry from "../../core/models/Olympic";
 import {ErrorMessageComponent} from "../../shared/error-message/error-message.component";
 import {LoadingSpinnerComponent} from "../../shared/loading-spinner/loading-spinner.component";
 
+/** Data structure for the line chart */
 interface LineChartSeries {
   name: string;
   series: { name: string; value: number }[];
@@ -30,7 +31,6 @@ interface LineChartSeries {
 })
 export class DetailComponent implements OnInit, OnDestroy {
 
-  /** Observable for the selected country */
   public country$!: Observable<IOlympicCountry | null | undefined>;
   public countryStats$!: Observable<{
     participationCount: number;
@@ -40,7 +40,6 @@ export class DetailComponent implements OnInit, OnDestroy {
   public medalSeries$!: Observable<LineChartSeries[]>;
   private destroy$ = new Subject<void>();
 
-  /** Error state for data loading */
   public hasError = false;
   public countryNotFound = false;
 
@@ -54,7 +53,7 @@ export class DetailComponent implements OnInit, OnDestroy {
   public yAxisLabel = 'Medals';
   public timeline = true;
 
-  /** Responsive view size based on window width */
+  /** Chart size, responsive to window width */
   public viewSize: [number, number] = [window.innerWidth < 700 ? window.innerWidth - 32 : 700, 300];
 
   constructor(
@@ -64,9 +63,6 @@ export class DetailComponent implements OnInit, OnDestroy {
   ) {
   }
 
-  /**
-   * Angular lifecycle hook. Initializes the component.
-   */
   ngOnInit(): void {
     window.addEventListener('resize', this.updateViewSize.bind(this));
     this.loadGlobalData();
@@ -75,19 +71,20 @@ export class DetailComponent implements OnInit, OnDestroy {
     this.initMedalSeriesObservable();
   }
 
-  /**
-   * Loads the global olympic data.
-   * Unsubscribes automatically on component destroy.
-   */
+  ngOnDestroy(): void {
+    window.removeEventListener('resize', this.updateViewSize.bind(this));
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  /** Loads olympic data and updates the service state */
   private loadGlobalData(): void {
     this.olympicService.loadInitialData()
       .pipe(takeUntil(this.destroy$))
       .subscribe();
   }
 
-  /**
-   * Initializes the country$ observable based on the route parameter.
-   */
+  /** Initializes the country observable from the route param */
   private initCountryObservable(): void {
     this.country$ = this.activatedRoute.paramMap.pipe(
       map(pm => Number(pm.get('id'))),
@@ -99,24 +96,11 @@ export class DetailComponent implements OnInit, OnDestroy {
           return [null];
         })
       )),
-      tap(country => {
-        if (country === null) {
-          this.hasError = true;
-          this.countryNotFound = true; // pays non trouvé
-        } else if (country === undefined) {
-          this.hasError = false;
-          this.countryNotFound = false; // chargement
-        } else {
-          this.hasError = false;
-          this.countryNotFound = false; // pays trouvé
-        }
-      })
+      tap(country => this.handleCountryState(country))
     );
   }
 
-  /**
-   * Initializes the countryStats$ observable with participation, medals, and athletes stats.
-   */
+  /** Computes stats for the selected country */
   private initCountryStatsObservable(): void {
     this.countryStats$ = this.country$.pipe(
       map(country => {
@@ -133,9 +117,7 @@ export class DetailComponent implements OnInit, OnDestroy {
     );
   }
 
-  /**
-   * Initializes the medalSeries$ observable for the line chart.
-   */
+  /** Prepares the medal series for the line chart */
   private initMedalSeriesObservable(): void {
     this.medalSeries$ = this.country$.pipe(
       map(country => {
@@ -149,25 +131,28 @@ export class DetailComponent implements OnInit, OnDestroy {
     );
   }
 
-  /**
-   * Angular lifecycle hook. Cleans up subscriptions on destroy.
-   */
-  ngOnDestroy(): void {
-    window.removeEventListener('resize', this.updateViewSize.bind(this));
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
-  /**
-   * Navigates back to the previous page.
-   */
+  /** Navigates to the home page */
   public goBack(): void {
     this.router.navigate(['/']);
   }
 
-  /** Updates the view size based on the window width */
+  /** Updates chart size on window resize */
   private updateViewSize() {
     const width = Math.min(window.innerWidth - 32, 700);
     this.viewSize = [width, 300];
+  }
+
+  /** Updates error and not found flags based on country value */
+  private handleCountryState(country: IOlympicCountry | null | undefined): void {
+    if (country === null) {
+      this.hasError = true;
+      this.countryNotFound = true;
+    } else if (country === undefined) {
+      this.hasError = false;
+      this.countryNotFound = false;
+    } else {
+      this.hasError = false;
+      this.countryNotFound = false;
+    }
   }
 }

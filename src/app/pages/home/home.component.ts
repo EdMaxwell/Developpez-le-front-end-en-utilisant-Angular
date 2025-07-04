@@ -32,19 +32,16 @@ interface ChartItem {
 })
 export class HomeComponent implements OnInit, OnDestroy {
 
-  /** Observable for chart data */
   public chartData$!: Observable<ChartItem[]>;
-  /** Error state for data loading */
   public hasError = false;
 
-  /** Chart configuration */
   public showLegend = false;
   public showLabels = true;
   public isDoughnut = false;
   private destroy$ = new Subject<void>();
   private _chartItems: ChartItem[] = [];
 
-  /** Responsive view size based on window width */
+  /** Responsive chart size */
   public view: [number, number] = [window.innerWidth < 700 ? window.innerWidth - 32 : 700, 400];
 
   constructor(
@@ -53,25 +50,24 @@ export class HomeComponent implements OnInit, OnDestroy {
   ) {
   }
 
-  /**
-   * Angular lifecycle hook. Initializes the component.
-   */
   ngOnInit(): void {
-    window.removeEventListener('resize', this.updateView.bind(this));
+    window.addEventListener('resize', this.updateView.bind(this));
     this.loadGlobalData();
     this.initChartDataObservable();
   }
+  
+  ngOnDestroy(): void {
+    window.removeEventListener('resize', this.updateView.bind(this));
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
-  /**
-   * Loads the global olympic data.
-   * Unsubscribes automatically on component destroy.
-   * Sets hasError to true if loading fails.
-   */
+  /** Loads olympic data and updates the service state */
   private loadGlobalData(): void {
     this.olympicService.loadInitialData()
       .pipe(
         takeUntil(this.destroy$),
-        catchError(err => {
+        catchError(() => {
           this.hasError = true;
           return of();
         })
@@ -79,9 +75,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       .subscribe();
   }
 
-  /**
-   * Initializes the chartData$ observable for the chart.
-   */
+  /** Initializes the chart data observable for the pie chart */
   private initChartDataObservable(): void {
     this.chartData$ = this.olympicService.getOlympics().pipe(
       map(list => {
@@ -103,15 +97,6 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Angular lifecycle hook. Cleans up subscriptions on destroy.
-   */
-  ngOnDestroy(): void {
-    window.removeEventListener('resize', this.updateView.bind(this));
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
-  /**
    * Handles chart item selection and navigates to the country detail page.
    * @param event The selected chart item event.
    */
@@ -122,7 +107,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     }
   }
 
-  /** Updates the view size based on the window width */
+  /** Updates the chart size on window resize */
   private updateView() {
     const width = Math.min(window.innerWidth - 32, 700);
     this.view = [width, 400];
