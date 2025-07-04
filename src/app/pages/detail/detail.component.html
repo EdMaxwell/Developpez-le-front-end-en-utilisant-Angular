@@ -1,14 +1,12 @@
 <section class="detail-container">
 
   <!-- Toolbar avec bouton retour et titre -->
-  <mat-toolbar class="title-toolbar">
-    <button (click)="goBack()" mat-icon-button>
-      <mat-icon>arrow_back</mat-icon>
-    </button>
+  <header class="toolbar">
+    <button (click)="goBack()" aria-label="Return">&#8592;</button>
     <span class="toolbar-title">
-      Détails pour {{ (country$ | async)?.country }}
+      Stats for {{ (country$ | async)?.country }}
     </span>
-  </mat-toolbar>
+  </header>
 
   <!-- Affichage du spinner pendant le chargement -->
   <ng-container *ngIf="(country$ | async) === undefined">
@@ -30,18 +28,18 @@
         <div class="stats-section">
           <h3 class="stats-header">Global Stats</h3>
           <div class="stats-cards">
-            <mat-card class="stat-card">
-              <mat-card-title>Participations</mat-card-title>
-              <mat-card-content>{{ stats.participationCount }}</mat-card-content>
-            </mat-card>
-            <mat-card class="stat-card">
-              <mat-card-title>Total medals</mat-card-title>
-              <mat-card-content>{{ stats.totalMedals }}</mat-card-content>
-            </mat-card>
-            <mat-card class="stat-card">
-              <mat-card-title>Total athletes</mat-card-title>
-              <mat-card-content>{{ stats.totalAthletes }}</mat-card-content>
-            </mat-card>
+            <div class="stat-card">
+              <div class="stat-title">Participations</div>
+              <div class="stat-value">{{ stats.participationCount }}</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-title">Total medals</div>
+              <div class="stat-value">{{ stats.totalMedals }}</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-title">Total athletes</div>
+              <div class="stat-value">{{ stats.totalAthletes }}</div>
+            </div>
           </div>
         </div>
       </ng-container>

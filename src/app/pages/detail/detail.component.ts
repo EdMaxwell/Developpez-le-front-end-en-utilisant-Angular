@@ -5,10 +5,6 @@ import {Observable, Subject, takeUntil} from 'rxjs';
 import {catchError, filter, map, switchMap, tap} from 'rxjs/operators';
 
 import {NgxChartsModule} from '@swimlane/ngx-charts';
-import {MatToolbarModule} from '@angular/material/toolbar';
-import {MatButtonModule} from '@angular/material/button';
-import {MatIconModule} from '@angular/material/icon';
-import {MatCardModule} from '@angular/material/card';
 
 import {OlympicService} from 'src/app/core/services/olympic.service';
 import IOlympicCountry from "../../core/models/Olympic";
@@ -26,10 +22,6 @@ interface LineChartSeries {
   imports: [
     CommonModule,
     NgxChartsModule,
-    MatToolbarModule,
-    MatButtonModule,
-    MatIconModule,
-    MatCardModule,
     ErrorMessageComponent,
     LoadingSpinnerComponent
   ],
@@ -53,7 +45,6 @@ export class DetailComponent implements OnInit, OnDestroy {
   public countryNotFound = false;
 
   // ngx-charts options
-  public viewSize: [number, number] = [700, 300];
   public showXAxis = true;
   public showYAxis = true;
   public showLegend = false;
@@ -62,6 +53,9 @@ export class DetailComponent implements OnInit, OnDestroy {
   public showYAxisLabel = true;
   public yAxisLabel = 'Medals';
   public timeline = true;
+
+  /** Responsive view size based on window width */
+  public viewSize: [number, number] = [window.innerWidth < 700 ? window.innerWidth - 32 : 700, 300];
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -74,6 +68,7 @@ export class DetailComponent implements OnInit, OnDestroy {
    * Angular lifecycle hook. Initializes the component.
    */
   ngOnInit(): void {
+    window.addEventListener('resize', this.updateViewSize.bind(this));
     this.loadGlobalData();
     this.initCountryObservable();
     this.initCountryStatsObservable();
@@ -98,7 +93,7 @@ export class DetailComponent implements OnInit, OnDestroy {
       map(pm => Number(pm.get('id'))),
       filter(id => !isNaN(id)),
       switchMap(id => this.olympicService.getCountryById(id).pipe(
-        catchError(err => {
+        catchError(() => {
           this.hasError = true;
           this.countryNotFound = false;
           return [null];
@@ -158,6 +153,7 @@ export class DetailComponent implements OnInit, OnDestroy {
    * Angular lifecycle hook. Cleans up subscriptions on destroy.
    */
   ngOnDestroy(): void {
+    window.removeEventListener('resize', this.updateViewSize.bind(this));
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -167,5 +163,11 @@ export class DetailComponent implements OnInit, OnDestroy {
    */
   public goBack(): void {
     this.router.navigate(['/']);
+  }
+
+  /** Updates the view size based on the window width */
+  private updateViewSize() {
+    const width = Math.min(window.innerWidth - 32, 700);
+    this.viewSize = [width, 300];
   }
 }
