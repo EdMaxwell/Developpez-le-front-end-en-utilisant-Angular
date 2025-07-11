@@ -3,7 +3,7 @@
   <!-- Toolbar avec bouton retour et titre -->
   <header class="toolbar">
     <button (click)="goBack()" aria-label="Return">&#8592;</button>
-    <span class="toolbar-title">
+    <span class="toolbar-title" *ngIf="(country$ | async) && !hasError">
       Stats for {{ (country$ | async)?.country }}
     </span>
   </header>
