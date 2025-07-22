@@ -1,3 +1,32 @@
-<h2>Olympic games app</h2>
-<hr />
-<p>{{ (olympics$ | async)?.length }} data loaded</p>
+<section class="home-container">
+
+  <header class="toolbar">
+    <span>Olympic Games Dashboard</span>
+  </header>
+
+  <!-- Message d’erreur si problème de chargement -->
+  <ng-container *ngIf="hasError">
+    <app-error-message message="Erreur lors du chargement des données."></app-error-message>
+  </ng-container>
+
+  <!-- Spinner pendant le chargement -->
+  <ng-container *ngIf="!hasError && (chartData$ | async) === undefined">
+    <app-loading-spinner></app-loading-spinner>
+  </ng-container>
+
+  <!-- Carte du graphique uniquement si données présentes et pas d’erreur -->
+  <ng-container *ngIf="!hasError && (chartData$ | async)?.length">
+    <div class="chart-card">
+      <ngx-charts-pie-chart
+        [results]="chartData$ | async"
+        [view]="view"
+        [legend]="showLegend"
+        [labels]="showLabels"
+        [doughnut]="isDoughnut"
+        [scheme]="'vivid'"
+        (select)="onSelect($event)">
+      </ngx-charts-pie-chart>
+    </div>
+  </ng-container>
+
+</section>

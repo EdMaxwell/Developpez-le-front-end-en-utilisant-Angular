@@ -1,1 +1,112 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+  --cyan: #06b6d4;
+  --cyan-dark: #0891b2;
+  --cyan-light: #67e8f9;
+  --bg: #f8fafc;
+  --text: #222;
+  --radius: 12px;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: 'Inter', 'Roboto', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+header, .toolbar {
+  background: var(--cyan);
+  color: #fff;
+  padding: 1rem;
+  font-size: 1.3rem;
+  font-weight: 600;
+  border-radius: 0 0 var(--radius) var(--radius);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+button {
+  background: var(--cyan-dark);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  padding: 0.6em 1.2em;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+button:hover {
+  background: var(--cyan);
+}
+
+.card, .stat-card {
+  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: 0 2px 8px #0001;
+  padding: 1.2rem;
+  margin: 0.5rem 0;
+}
+
+.stats-section {
+  margin: 1.5rem 0;
+}
+
+.stats-cards {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.stats-header {
+  color: var(--cyan-dark);
+  margin-bottom: 0.5rem;
+}
+
+.chart-wrapper {
+  margin: 2rem 0;
+  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: 0 2px 8px #0001;
+  padding: 1rem;
+}
+
+.error-message {
+  background: #fee2e2;
+  color: #b91c1c;
+  border-radius: var(--radius);
+  padding: 1rem;
+  margin: 1rem 0;
+  text-align: center;
+}
+
+@media (max-width: 700px) {
+  .stats-cards, .chart-wrapper {
+    flex-direction: column;
+    width: 100%;
+    padding: 0.5rem;
+  }
+  .card, .stat-card, .chart-wrapper {
+    padding: 0.7rem;
+    font-size: 0.95rem;
+  }
+  header, .toolbar {
+    font-size: 1rem;
+    padding: 0.7rem;
+  }
+}
+
+section.home-container,
+section.detail-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.toolbar,
+header.toolbar {
+  justify-content: center;
+}
