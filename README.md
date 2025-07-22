@@ -18,7 +18,7 @@ Ce projet a été réalisé dans le cadre d'une formation chez OpenClassrooms. I
 
 ## Prérequis
 
-- Node.js (22.16.)
+- Node.js (22.16.0)
 - npm (11.4)
 - Angular CLI (optionnel, recommandé: `npm install -g @angular/cli`)
 
