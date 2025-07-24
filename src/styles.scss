@@ -1,7 +1,7 @@
 :root {
-  --cyan: #06b6d4;
-  --cyan-dark: #0891b2;
-  --cyan-light: #67e8f9;
+  --cyan: #04838f;
+  --cyan-dark: #04838f;
+  --cyan-light: #06abbb;
   --bg: #f8fafc;
   --text: #222;
   --radius: 12px;
@@ -28,8 +28,8 @@ header, .toolbar {
 }
 
 button {
-  background: var(--cyan-dark);
-  color: #fff;
+  background: var(--bg);
+  color: var(--cyan);
   border: none;
   border-radius: var(--radius);
   padding: 0.6em 1.2em;
@@ -47,7 +47,8 @@ button:hover {
   border-radius: var(--radius);
   box-shadow: 0 2px 8px #0001;
   padding: 1.2rem;
-  margin: 0.5rem 0;
+  margin: 1rem 0;
+  border: 2px solid var(--cyan);
 }
 
 .stats-section {

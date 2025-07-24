@@ -6,7 +6,7 @@
 
   <!-- Message d’erreur si problème de chargement -->
   <ng-container *ngIf="hasError">
-    <app-error-message message="Erreur lors du chargement des données."></app-error-message>
+    <app-error-message message="Error while loading data."></app-error-message>
   </ng-container>
 
   <!-- Spinner pendant le chargement -->
@@ -16,6 +16,18 @@
 
   <!-- Carte du graphique uniquement si données présentes et pas d’erreur -->
   <ng-container *ngIf="!hasError && (chartData$ | async)?.length">
+    <div class="stats-cards" style="margin-bottom: 1.5rem;">
+      <!-- Card Nombre de JO -->
+      <div class="stat-card">
+        <div class="stat-title">Number of JOs</div>
+        <div class="stat-value">{{ numberOfJOs }}</div>
+      </div>
+      <!-- Card Nombre de pays -->
+      <div class="stat-card">
+        <div class="stat-title">Number of country</div>
+        <div class="stat-value">{{ numberOfCountries }}</div>
+      </div>
+    </div>
     <div class="chart-card">
       <ngx-charts-pie-chart
         [results]="chartData$ | async"
