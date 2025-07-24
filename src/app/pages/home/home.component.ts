@@ -41,6 +41,9 @@ export class HomeComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private _chartItems: ChartItem[] = [];
 
+  public numberOfJOs = 0;
+  public numberOfCountries = 0;
+
   /** Responsive chart size */
   public view: [number, number] = [window.innerWidth < 700 ? window.innerWidth - 32 : 700, 400];
 
@@ -55,7 +58,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.loadGlobalData();
     this.initChartDataObservable();
   }
-  
+
   ngOnDestroy(): void {
     window.removeEventListener('resize', this.updateView.bind(this));
     this.destroy$.next();
@@ -86,6 +89,13 @@ export class HomeComponent implements OnInit, OnDestroy {
         if (!Array.isArray(list)) {
           return [];
         }
+        // Calcul du nombre de pays
+        this.numberOfCountries = list.length;
+
+        // Calcul du nombre de JO différents (toutes années confondues)
+        const allYears = list.flatMap(country => country.participations.map(p => p.year));
+        this.numberOfJOs = new Set(allYears).size;
+
         return list.map(country => ({
           name: country.country,
           value: country.participations.reduce((sum, p) => sum + p.medalsCount, 0),
